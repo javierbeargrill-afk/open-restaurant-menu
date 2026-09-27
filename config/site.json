@@ -3,8 +3,8 @@
   "tagline": "Fresh food, simple ordering",
   "city": "Your City",
   "country": "Your Country",
-  "phone": "50760000000",
-  "whatsappPhone": "50760000000",
+  "phone": "",
+  "whatsappPhone": "",
   "currency": "USD",
   "currencySymbol": "$",
   "locale": "en-US",
@@ -59,7 +59,7 @@
     }
   ],
   "timezone": "America/Panama",
-  "enforceHours": false,
+  "enforceHours": true,
   "paymentMethods": [
     {
       "id": "cash",
@@ -83,5 +83,11 @@
     "pickupAddress": "Configure your public pickup address in config/site.json",
     "pickupInstructions": "We will confirm by WhatsApp when your order is ready.",
     "pickupMapUrl": ""
+  },
+  "demoMode": true,
+  "admin": {
+    "mode": "local-demo",
+    "apiUrl": "",
+    "openWithFiveFooterTaps": true
   }
 }
