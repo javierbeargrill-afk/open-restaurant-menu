@@ -1,79 +1,308 @@
 # Open Restaurant Menu
 
-A free, privacy-conscious, open-source menu and WhatsApp ordering starter for small restaurants, food trucks, home kitchens and delivery businesses.
+**A free, open-source restaurant menu you can publish with GitHub Pages and send orders to WhatsApp.**
 
-It can run in two modes:
+Built for small restaurants, food trucks, delivery kitchens and home-based food businesses that want a real web menu without starting from a complex ecommerce stack.
 
-- **Basic:** GitHub Pages + a JSON menu. No backend required.
-- **Advanced:** Loyverse → Supabase → GitHub Pages, with automatic menu synchronization.
+> You can start with **just GitHub Pages + two editable files**. Supabase and Loyverse are optional upgrades.
 
-The project came from a real small delivery restaurant workflow and is shared back with the community so other businesses can launch a useful web menu without paying for a website platform.
+[Live demo](https://javierbeargrill-afk.github.io/open-restaurant-menu/) · [Español](README.es.md) · [Beginner guide](docs/GETTING_STARTED.md) · [How the ecosystem works](docs/ECOSYSTEM.md) · [Glossary](docs/GLOSSARY.md)
 
-## Features
+---
 
-- Mobile-first menu with categories and search.
-- Cart and WhatsApp order handoff.
-- Delivery or pickup fulfillment.
-- Optional browser geolocation that adds a Google Maps link to delivery orders.
-- Reusable admin/developer panel with secure Supabase mode.
-- Session-only test mode that bypasses hours without changing the published schedule.
-- Static JSON or Supabase menu source.
-- Optional Loyverse synchronization through a Supabase Edge Function.
-- GitHub Pages friendly.
-- SEO-ready foundation with Schema.org markup, sitemap and robots file.
-- MIT license.
-- No analytics or installation tracking by default.
-- Privacy-first: customer data storage is not required for the core product.
+## What does this project actually do?
 
-## Quick start — free/basic mode
+A customer opens your menu, adds products to a cart, chooses **Delivery or Pickup**, optionally shares their location, and sends the finished order to your WhatsApp.
 
-1. Create a repository from this project or fork it.
-2. Edit `config/site.json` with your public business information.
-3. Edit `data/menu.json` with your products.
-4. Configure delivery/pickup and optional location sharing in `config/site.json`.
-5. Replace the placeholder domain in `sitemap.xml`.
-6. Enable GitHub Pages for the `main` branch.
+```mermaid
+flowchart LR
+    A["Customer opens menu"] --> B["Adds products"]
+    B --> C{"Delivery or Pickup?"}
+    C -->|Delivery| D["Zone + optional location"]
+    C -->|Pickup| E["Pickup instructions"]
+    D --> F["Order summary"]
+    E --> F
+    F --> G["WhatsApp"]
+```
 
-## Advanced mode — Loyverse + Supabase
+No ecommerce platform is required for the basic version.
 
-1. Create a Supabase project.
-2. Apply `supabase/migrations/001_init.sql`.
-3. Deploy `supabase/functions/loyverse-menu`.
-4. Set server-side secrets from `.env.example` in Supabase — **do not commit their real values**.
-5. Call the function with `?sync=true` and the `x-sync-secret` header.
-6. Set `dataSource` to `supabase` in `config/site.json`, and add the public Supabase URL and anon/publishable key.
-7. Apply `supabase/migrations/003_admin.sql` if you want the secure admin panel.
-8. Deploy `supabase/functions/admin-api` and configure `ADMIN_PASSWORD` plus `ADMIN_ALLOWED_ORIGINS` as server-side secrets.
-9. Set `admin.mode` to `supabase` in `config/site.json`.
-10. Optionally adapt `supabase/migrations/002_optional_cron.sql` to schedule synchronization.
+---
 
-## What belongs in public GitHub?
+## Start simple. Grow only when you need it.
 
-Code, public branding, public menu data and documentation can be public. POS tokens, service-role keys, customer information, private addresses, internal recipes, costs, margins and financial data should not be.
+### Level 1 — Basic
 
-See [SECURITY.md](SECURITY.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Best if you just want a menu online.
 
-## How do I know if people use it?
+```text
+GitHub Pages
+   ├── config/site.json   → business settings
+   └── data/menu.json     → products and prices
+              ↓
+         Customer cart
+              ↓
+           WhatsApp
+```
 
-GitHub exposes public signals such as Stars, Forks, contributors, pull requests and repository traffic. Actual deployments are intentionally not tracked. Businesses can voluntarily add themselves to [ADOPTERS.md](ADOPTERS.md).
+**You need:** a GitHub account and a WhatsApp number.
 
-## Can community improvements flow back into my restaurant?
+### Level 2 — Connected
 
-Yes. The recommended model is to keep this repository as the reusable upstream core. Production restaurants periodically review upstream releases or pull requests and selectively merge safe improvements. Never auto-deploy unreviewed community code directly to a live business.
+Best if your menu already lives in Loyverse.
+
+```mermaid
+flowchart LR
+    L["Loyverse POS"] --> S["Supabase Edge Function"]
+    S --> C["Public menu cache"]
+    C --> W["GitHub Pages menu"]
+    W --> WA["WhatsApp order"]
+```
+
+Products and prices can be synchronized instead of edited manually.
+
+### Level 3 — Managed
+
+Adds a secure admin backend and operational tools.
+
+```mermaid
+flowchart TD
+    A["Admin panel"] --> H["Business hours"]
+    A --> T["Developer / Test mode"]
+    A --> M["Manual menu sync"]
+    A --> R["Runtime settings"]
+    T --> X["Test ordering outside hours"]
+    X --> Y["TEST ORDER — DO NOT PREPARE"]
+```
+
+Test mode lets you test ordering while the restaurant is closed **without changing the real schedule**.
+
+---
+
+## What can customers do?
+
+- Browse menu categories.
+- Search products.
+- Add/remove quantities.
+- Choose **Delivery** or **Pickup**.
+- Select a delivery zone and fee.
+- Share exact browser location for delivery.
+- Choose a payment method.
+- Add notes.
+- See subtotal, delivery and total.
+- Send the formatted order to WhatsApp.
+- Be prevented from ordering outside configured business hours.
+
+---
+
+## What can the restaurant owner do?
+
+In basic mode, edit a few configuration files in GitHub.
+
+In advanced mode, the Admin panel can support:
+
+- Real business hours.
+- Developer/Test mode.
+- Manual Loyverse synchronization.
+- Menu status information.
+- Runtime settings.
+- Secure login through Supabase.
+- Session-only test orders.
+
+See [Admin & Developer Mode](docs/ADMIN.md).
+
+---
+
+## Do I need to be a developer?
+
+**No for the basic setup.** Most restaurant owners only need to understand these files:
+
+| File | What it controls | Usually edit it? |
+|---|---|---:|
+| `config/site.json` | Business name, hours, WhatsApp, delivery, pickup, colors | ✅ Yes |
+| `data/menu.json` | Products, descriptions, prices | ✅ Yes in basic mode |
+| `sitemap.xml` | Your published website address | ✅ Once |
+| `.env.example` | Shows which private secrets advanced mode needs | ❌ Never put real secrets here |
+| `index.html` | The application itself | Usually no |
+| `supabase/` | Advanced backend, sync and admin | Only advanced installs |
+
+For every setting in `site.json`, see [Configuration Dictionary](docs/CONFIGURATION.md).
+
+---
+
+## The ecosystem in one picture
+
+```mermaid
+flowchart TB
+    subgraph Public["PUBLIC / SAFE TO PUBLISH"]
+      GH["GitHub repository"]
+      P["GitHub Pages"]
+      CFG["site.json"]
+      MENU["menu.json or public menu cache"]
+    end
+
+    subgraph Private["PRIVATE / SERVER SIDE"]
+      LV["Loyverse token"]
+      SR["Supabase service-role key"]
+      AP["Admin password"]
+    end
+
+    LV --> EF["Supabase Edge Functions"]
+    SR --> EF
+    AP --> EF
+    EF --> DB["Supabase database / menu cache"]
+    DB --> P
+    CFG --> P
+    MENU --> P
+    GH --> P
+    P --> CUST["Customer browser"]
+    CUST --> WA["WhatsApp"]
+```
+
+**Rule of thumb:** code and public menu information can live on GitHub; passwords, POS tokens, private addresses and customer information cannot.
+
+Read [Security](SECURITY.md) before connecting a real business.
+
+---
+
+## Quick start — basic version
+
+1. Fork this repository.
+2. Edit `config/site.json`.
+3. Edit `data/menu.json`.
+4. Put your GitHub Pages address in `sitemap.xml`.
+5. Enable **Settings → Pages → Deploy from branch → main → / (root)**.
+6. Open your new menu.
+7. Test the complete order flow.
+
+Detailed screenshots/checklist: [Getting Started](docs/GETTING_STARTED.md).
+
+---
+
+## Advanced setup — Loyverse + Supabase
+
+Use this only when you need automatic menu synchronization or a secure admin backend.
+
+```mermaid
+sequenceDiagram
+    participant L as Loyverse
+    participant E as Supabase Edge Function
+    participant D as Supabase menu_cache
+    participant G as GitHub Pages
+    participant U as Customer
+    participant W as WhatsApp
+
+    E->>L: Request current items/prices
+    L-->>E: Catalog
+    E->>D: Update public menu cache
+    U->>G: Open menu
+    G->>D: Read menu
+    D-->>G: Products/prices
+    U->>G: Build order
+    G->>W: Open formatted order
+```
+
+Setup guide: [Ecosystem](docs/ECOSYSTEM.md) and [Architecture](docs/ARCHITECTURE.md).
+
+---
+
+## How development works on GitHub
+
+Changes should normally follow this path:
+
+```mermaid
+flowchart LR
+    I["Issue / idea"] --> B["Feature branch"]
+    B --> C["Code / docs"]
+    C --> PR["Pull Request"]
+    PR --> CI["GitHub Actions checks"]
+    CI --> R["Human review"]
+    R --> M["Merge to main"]
+    M --> P["GitHub Pages deploy"]
+```
+
+This is important for real restaurants: **community code should be reviewed before it reaches production.**
+
+Read [GitHub Workflow](docs/GITHUB-FLOW.md).
+
+---
+
+## Main folders
+
+```text
+open-restaurant-menu/
+├── config/                  # Public restaurant configuration
+│   └── site.json
+├── data/                    # Static/basic menu
+│   └── menu.json
+├── docs/                    # Human-readable guides
+├── scripts/                 # Validation/helper scripts
+├── supabase/
+│   ├── functions/           # Loyverse sync + secure admin API
+│   └── migrations/          # Database setup
+├── .github/
+│   └── workflows/           # Automatic validation
+├── index.html               # Web application
+├── SECURITY.md
+├── CONTRIBUTING.md
+└── LICENSE
+```
+
+---
+
+## I saw a technical word I do not understand
+
+That's expected. Start with the [Plain-language Glossary](docs/GLOSSARY.md).
+
+Examples:
+
+- **Fork:** your own copy of this GitHub project.
+- **GitHub Pages:** turns the repository into a public website.
+- **Supabase:** optional backend/database.
+- **Edge Function:** small server-side program that can safely use private secrets.
+- **API:** a structured way for two systems to talk to each other.
+- **RLS:** database rules controlling who can read/write data.
+- **Pull Request:** a proposed change that can be reviewed before merging.
+
+---
+
+## Privacy by design
+
+This project intentionally does **not** track installations or customer behavior by default.
+
+Never commit:
+
+- Loyverse tokens.
+- Supabase service-role keys.
+- Admin passwords.
+- Customer names, phone numbers, addresses or orders.
+- Private residential addresses.
+- Internal recipes, costs, margins or financial records.
+
+See [SECURITY.md](SECURITY.md).
+
+---
+
+## Community
+
+If you use the project, you can optionally add your business to [ADOPTERS.md](ADOPTERS.md).
+
+Useful contributions include:
+
+- accessibility improvements;
+- better mobile UX;
+- translations;
+- POS integrations;
+- documentation;
+- performance improvements;
+- bug fixes.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
 
 ## License
 
-MIT. Use it, modify it, fork it and improve it.
+MIT — use it, fork it, adapt it and improve it.
 
-
-## Admin / developer panel
-
-The demo uses `admin.mode: "local-demo"` so the admin tools can be explored without credentials. This mode is **not secure** and should not be used for a live restaurant.
-
-A production advanced deployment should use `admin.mode: "supabase"`. The password is stored only as a Supabase Edge Function secret, and successful login creates a temporary server-side session.
-
-Open the panel by tapping the footer credit five times, or append `?admin=1` while setting up the site.
-
-Current admin tools include menu/category status, manual Loyverse sync in advanced mode, schedule editing, cache/cart reset, and a **Test mode**. Test mode is stored only for the current browser session; it enables the order button outside business hours without modifying the restaurant's real schedule, and test messages are prefixed with **TEST ORDER — DO NOT PREPARE**.
-
-See [docs/ADMIN.md](docs/ADMIN.md).
+The goal is simple: **give small food businesses a useful web ordering foundation they can understand, own and improve.**
