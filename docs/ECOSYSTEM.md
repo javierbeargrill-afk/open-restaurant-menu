@@ -141,19 +141,49 @@ flowchart LR
     ENABLE --> LABEL["Message marked TEST ORDER"]
 ```
 
-## Google integrations
+## Google integrations — Phase 2
 
-Google is intentionally optional.
+Google is intentionally optional. The core ordering system must continue to work even if no Google account or API is connected.
 
-Possible extensions include:
+The Phase 2 idea is to avoid maintaining three separate copies of the same restaurant information.
 
-- Search Console;
-- structured SEO;
-- Analytics;
-- Business Profile menu synchronization;
-- Business Profile performance metrics.
+```mermaid
+flowchart TD
+    SOURCE["Loyverse or another menu source"] --> NORMALIZE["Supabase normalization layer"]
+    NORMALIZE --> SITE["Restaurant website"]
+    NORMALIZE --> GBP["Google Business Profile"]
+    SITE --> SEARCH["Google Search crawling"]
+    GBP --> MAPS["Google Maps / Business surfaces"]
+    SITE --> SC["Search Console visibility"]
+```
 
-The core menu must remain usable without these services.
+### Intended responsibilities
+
+**Website / SEO**
+- crawlable menu content;
+- Schema.org Restaurant/Menu markup;
+- canonical URL;
+- sitemap;
+- fast public images;
+- clear category/product information.
+
+**Google Business Profile**
+- keep eligible menu information aligned with the restaurant's source of truth;
+- explore item names, descriptions, prices and photos where supported;
+- avoid manual re-entry when a product changes.
+
+**Search Console**
+- observe crawl/indexing status;
+- submit/refresh sitemap when appropriate;
+- help diagnose discoverability problems.
+
+### Important limitation
+
+This is an experimental roadmap, not a promise that every Google Business Profile supports every menu/media capability. API access, account approval, category eligibility and Google product behavior may vary.
+
+For that reason, implementation should start with a small controlled test before any full automatic synchronization.
+
+See [GOOGLE-PHASE-2.md](GOOGLE-PHASE-2.md).
 
 ## What is mandatory?
 

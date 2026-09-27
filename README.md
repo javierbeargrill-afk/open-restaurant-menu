@@ -6,7 +6,7 @@ Built for small restaurants, food trucks, delivery kitchens and home-based food 
 
 > You can start with **just GitHub Pages + two editable files**. Supabase and Loyverse are optional upgrades.
 
-[Live demo](https://javierbeargrill-afk.github.io/open-restaurant-menu/) · [Español](README.es.md) · [Beginner guide](docs/GETTING_STARTED.md) · [How the ecosystem works](docs/ECOSYSTEM.md) · [Glossary](docs/GLOSSARY.md)
+[🧪 Live demo](https://javierbeargrill-afk.github.io/open-restaurant-menu/) · [🔥 Real restaurant example](https://menujaviergrill.store/) · [Español](README.es.md) · [Beginner guide](docs/GETTING_STARTED.md) · [Ecosystem](docs/ECOSYSTEM.md) · [Glossary](docs/GLOSSARY.md)
 
 ---
 
@@ -26,6 +26,13 @@ flowchart LR
 ```
 
 No ecommerce platform is required for the basic version.
+
+### See it working
+
+- **🧪 Interactive demo:** use the GitHub Pages demo to test the cart, Delivery/Pickup, location sharing and developer mode safely.
+- **🔥 Real-world implementation:** [Javier Bear Grill](https://menujaviergrill.store/) is a production restaurant using the architecture as it evolves.
+
+> The production restaurant is real. Please use the demo for test orders.
 
 ---
 
@@ -76,6 +83,33 @@ flowchart TD
 ```
 
 Test mode lets you test ordering while the restaurant is closed **without changing the real schedule**.
+
+### Phase 2 — Google discovery & menu distribution
+
+The next experimental phase is to connect the same menu source to Google's ecosystem so a restaurant can improve discovery without maintaining a second menu manually.
+
+Planned direction:
+
+```mermaid
+flowchart LR
+    L["Loyverse / menu source"] --> S["Supabase normalization"]
+    S --> W["Restaurant website"]
+    S --> G["Google Business Profile"]
+    W --> SEO["SEO + structured data + sitemap"]
+    G --> GM["Google Search / Maps surfaces"]
+```
+
+Goals include:
+
+- synchronize eligible menu items, prices, descriptions and photos to Google Business Profile;
+- keep the restaurant website SEO-friendly with crawlable HTML, Schema.org, canonical URLs and sitemap;
+- connect Search Console for indexing/coverage visibility;
+- avoid duplicating manual maintenance between the POS, website and Google;
+- keep Google integration optional so the core project still works without it.
+
+This phase is **exploratory and not complete yet**. Google API access, product eligibility and media/menu behavior can vary, so we are actively looking for contributors with experience in **Google Business Profile APIs, Search Console, structured data and local restaurant SEO**.
+
+See [Phase 2: Google](docs/GOOGLE-PHASE-2.md).
 
 ---
 
