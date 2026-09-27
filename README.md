@@ -15,6 +15,8 @@ The project came from a real small delivery restaurant workflow and is shared ba
 - Cart and WhatsApp order handoff.
 - Delivery or pickup fulfillment.
 - Optional browser geolocation that adds a Google Maps link to delivery orders.
+- Reusable admin/developer panel with secure Supabase mode.
+- Session-only test mode that bypasses hours without changing the published schedule.
 - Static JSON or Supabase menu source.
 - Optional Loyverse synchronization through a Supabase Edge Function.
 - GitHub Pages friendly.
@@ -40,7 +42,10 @@ The project came from a real small delivery restaurant workflow and is shared ba
 4. Set server-side secrets from `.env.example` in Supabase — **do not commit their real values**.
 5. Call the function with `?sync=true` and the `x-sync-secret` header.
 6. Set `dataSource` to `supabase` in `config/site.json`, and add the public Supabase URL and anon/publishable key.
-7. Optionally adapt `supabase/migrations/002_optional_cron.sql` to schedule synchronization.
+7. Apply `supabase/migrations/003_admin.sql` if you want the secure admin panel.
+8. Deploy `supabase/functions/admin-api` and configure `ADMIN_PASSWORD` plus `ADMIN_ALLOWED_ORIGINS` as server-side secrets.
+9. Set `admin.mode` to `supabase` in `config/site.json`.
+10. Optionally adapt `supabase/migrations/002_optional_cron.sql` to schedule synchronization.
 
 ## What belongs in public GitHub?
 
@@ -59,3 +64,16 @@ Yes. The recommended model is to keep this repository as the reusable upstream c
 ## License
 
 MIT. Use it, modify it, fork it and improve it.
+
+
+## Admin / developer panel
+
+The demo uses `admin.mode: "local-demo"` so the admin tools can be explored without credentials. This mode is **not secure** and should not be used for a live restaurant.
+
+A production advanced deployment should use `admin.mode: "supabase"`. The password is stored only as a Supabase Edge Function secret, and successful login creates a temporary server-side session.
+
+Open the panel by tapping the footer credit five times, or append `?admin=1` while setting up the site.
+
+Current admin tools include menu/category status, manual Loyverse sync in advanced mode, schedule editing, cache/cart reset, and a **Test mode**. Test mode is stored only for the current browser session; it enables the order button outside business hours without modifying the restaurant's real schedule, and test messages are prefixed with **TEST ORDER — DO NOT PREPARE**.
+
+See [docs/ADMIN.md](docs/ADMIN.md).

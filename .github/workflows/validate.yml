@@ -27,3 +27,6 @@ jobs:
             echo "Potential secret detected. Remove it before merging."
             exit 1
           fi
+
+      - name: Check browser JavaScript syntax
+        run: python3 scripts/check_browser_js.py
