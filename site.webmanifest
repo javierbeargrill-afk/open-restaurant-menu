@@ -1,0 +1,8 @@
+{
+  "name": "Open Restaurant Menu",
+  "short_name": "Restaurant Menu",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#faf7f4",
+  "theme_color": "#3d1800"
+}
