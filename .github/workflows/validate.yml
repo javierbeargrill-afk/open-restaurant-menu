@@ -1,0 +1,29 @@
+name: Validate project
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          python3 -m json.tool config/site.json >/dev/null
+          python3 -m json.tool data/menu.json >/dev/null
+          python3 -m json.tool site.webmanifest >/dev/null
+
+      - name: Privacy guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude-dir=.git --exclude='.env.example'             '(eyJ[a-zA-Z0-9_-]{20,}.[a-zA-Z0-9_-]{20,}.[a-zA-Z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|Bearer [A-Za-z0-9._-]{24,})' .; then
+            echo "Potential secret detected. Remove it before merging."
+            exit 1
+          fi
