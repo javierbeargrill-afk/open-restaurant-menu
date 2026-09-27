@@ -1,0 +1,21 @@
+[
+  {
+    "name": "Burgers",
+    "items": [
+      {"id":"classic-burger","name":"Classic Burger","description":"Fresh beef, cheese and house sauce.","price":5.99,"image":""},
+      {"id":"double-burger","name":"Double Burger","description":"Two patties, cheese and grilled onion.","price":7.99,"image":""}
+    ]
+  },
+  {
+    "name": "Sides",
+    "items": [
+      {"id":"fries","name":"French Fries","description":"Crispy fries.","price":1.99,"image":""}
+    ]
+  },
+  {
+    "name": "Drinks",
+    "items": [
+      {"id":"soda","name":"Soda","description":"Cold canned soda.","price":1.25,"image":""}
+    ]
+  }
+]
