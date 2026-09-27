@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="./">
+  <link rel="manifest" href="site.webmanifest">
+  <title>Restaurant Menu</title>
+  <style>
+    :root{--primary:#ff8732;--dark:#3d1800;--bg:#faf7f4;--card:#fff;--muted:#725a4d;--line:#eadfd8;--green:#25d366}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#24130c}
+    header{position:sticky;top:0;z-index:5;background:var(--dark);color:#fff;padding:12px 16px;box-shadow:0 2px 12px #0003}.head{max-width:980px;margin:auto;display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}.brand img{width:46px;height:46px;border-radius:10px;object-fit:cover}.brand h1{font-size:20px;margin:0}.brand p{margin:3px 0 0;opacity:.75;font-size:12px}.status{font-size:12px;font-weight:800;white-space:nowrap}.open{color:#65ef98}.closed{color:#ff8192}
+    main{max-width:980px;margin:auto;padding:16px}.search{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:15px}
+    .section{margin:24px 0}.section h2{font-size:22px;margin:0 0 10px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 2px 9px #3d18000d}.card img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#efe9e4}.pad{padding:10px}.name{font-weight:800}.desc{font-size:12px;color:var(--muted);min-height:32px;margin-top:4px}.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}.price{font-weight:800;color:var(--primary)}button{border:0;border-radius:999px;padding:9px 12px;font-weight:800;cursor:pointer}.add{background:var(--primary);color:#201008}
+    #cartPanel{max-width:980px;margin:18px auto 120px;padding:0 16px}.cart-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.cart-item{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.cart-actions{display:flex;gap:6px;align-items:center}.mini{padding:4px 8px;background:#eee}.field{margin-top:12px}.field label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}.sum{margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}.sumline{display:flex;justify-content:space-between;margin:5px 0}.order{width:100%;margin-top:12px;background:var(--green);color:white;padding:13px}.order:disabled{opacity:.5;cursor:not-allowed}
+    #quickCart{position:fixed;bottom:14px;right:14px;background:var(--dark);color:#fff;border-radius:999px;padding:12px 16px;box-shadow:0 5px 20px #0004;z-index:8}.empty{text-align:center;color:var(--muted);padding:24px}.footer{padding:30px 16px 110px;text-align:center;color:var(--muted);font-size:12px}
+    @media(min-width:760px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.brand h1{font-size:24px}}
+  </style>
+  <script id="restaurantSchema" type="application/ld+json">{"@context":"https://schema.org","@type":"Restaurant"}</script>
+</head>
+<body>
+  <header><div class="head"><div class="brand"><img id="logo" alt="" hidden><div><h1 id="businessName">Restaurant Menu</h1><p id="tagline"></p></div></div><div id="status" class="status">…</div></div></header>
+  <main>
+    <input id="search" class="search" type="search" placeholder="Search the menu…" aria-label="Search menu">
+    <div id="menu"><div class="empty">Loading menu…</div></div>
+  </main>
+
+  <section id="cartPanel">
+    <div class="cart-box">
+      <h2>Your order</h2>
+      <div id="cartItems"><div class="empty">Your cart is empty.</div></div>
+      <div class="field"><label for="customerName">Name</label><input id="customerName" autocomplete="name" placeholder="Your name"></div>
+      <div class="field"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, house, reference"></div>
+      <div class="field"><label for="zone">Delivery zone</label><select id="zone"></select></div>
+      <div class="field"><label for="payment">Payment</label><select id="payment"></select></div>
+      <div class="field"><label for="notes">Notes</label><input id="notes" placeholder="No onions, gate color, etc."></div>
+      <div class="sum"><div class="sumline"><span>Subtotal</span><span id="subtotal">$0.00</span></div><div class="sumline"><span>Delivery</span><span id="delivery">$0.00</span></div><div class="sumline"><strong>Total</strong><strong id="total">$0.00</strong></div></div>
+      <button id="orderBtn" class="order">Order on WhatsApp</button>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:0">Customer details stay in the browser and are sent to WhatsApp only when you press the order button. The core template does not store them.</p>
+    </div>
+  </section>
+
+  <button id="quickCart">🛒 <span id="cartCount">0</span> · <span id="quickTotal">$0.00</span></button>
+  <div class="footer">Powered by Open Restaurant Menu · Open source</div>
+<script>
+const state={config:null,menu:[],cart:new Map(),open:true};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function getJSON(url,opts={}){const r=await fetch(url,opts);if(!r.ok)throw new Error(`${r.status} ${url}`);return r.json()}
+function normalizeSupabase(data){return (data||[]).map(c=>({name:String(c.n||'Menu').replace(/^\p{Emoji}+\s*/u,''),items:(c.i||[]).map((i,n)=>({id:(i.n||n).toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-'),name:i.n,description:i.d||'',price:Number(i.p||0),image:i.img||''}))}))}
+async function loadMenu(){const c=state.config;if(c.dataSource==='supabase'&&c.supabaseUrl&&c.supabaseAnonKey){const rows=await getJSON(`${c.supabaseUrl}/rest/v1/menu_cache?id=eq.1&select=data`,{headers:{apikey:c.supabaseAnonKey,Authorization:`Bearer ${c.supabaseAnonKey}`}});return normalizeSupabase(rows?.[0]?.data||[])}return getJSON('data/menu.json')}
+function money(v){const c=state.config;return new Intl.NumberFormat(c.locale||'en-US',{style:'currency',currency:c.currency||'USD'}).format(v)}
+function allItems(){return state.menu.flatMap(s=>s.items)}
+function render(q=''){const needle=q.trim().toLowerCase();const blocks=[];for(const sec of state.menu){const items=sec.items.filter(i=>!needle||`${i.name} ${i.description} ${sec.name}`.toLowerCase().includes(needle));if(!items.length)continue;blocks.push(`<section class="section"><h2>${esc(sec.name)}</h2><div class="grid">${items.map(i=>`<article class="card" itemscope itemtype="https://schema.org/MenuItem">${i.image?`<img loading="lazy" src="${esc(i.image)}" alt="${esc(i.name)}" itemprop="image">`:''}<div class="pad"><div class="name" itemprop="name">${esc(i.name)}</div><div class="desc" itemprop="description">${esc(i.description)}</div><div class="row" itemprop="offers" itemscope itemtype="https://schema.org/Offer"><span class="price" itemprop="price" content="${i.price.toFixed(2)}">${money(i.price)}</span><meta itemprop="priceCurrency" content="${esc(state.config.currency||'USD')}"><button class="add" data-id="${esc(i.id)}">+ Add</button></div></div></article>`).join('')}</div></section>`)}$('#menu').innerHTML=blocks.join('')||'<div class="empty">No products found.</div>';document.querySelectorAll('.add').forEach(b=>b.onclick=()=>add(b.dataset.id))}
+function add(id){const i=allItems().find(x=>x.id===id);if(!i)return;const row=state.cart.get(id)||{...i,qty:0};row.qty++;state.cart.set(id,row);renderCart()}
+function changeQty(id,delta){const row=state.cart.get(id);if(!row)return;row.qty+=delta;if(row.qty<=0)state.cart.delete(id);renderCart()}
+function selectedZone(){const zones=state.config.deliveryZones||[];return zones[Number($('#zone').value)||0]||{name:'Delivery',price:0}}
+function renderCart(){let qty=0,sub=0;const rows=[];for(const i of state.cart.values()){qty+=i.qty;sub+=i.price*i.qty;rows.push(`<div class="cart-item"><span>${i.qty}× ${esc(i.name)}</span><span class="cart-actions"><strong>${money(i.price*i.qty)}</strong><button class="mini" data-minus="${esc(i.id)}">−</button><button class="mini" data-plus="${esc(i.id)}">+</button></span></div>`)}$('#cartItems').innerHTML=rows.join('')||'<div class="empty">Your cart is empty.</div>';document.querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.minus,-1));document.querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.plus,1));const delivery=state.cart.size?Number(selectedZone().price||0):0;const total=sub+delivery;$('#cartCount').textContent=qty;$('#quickTotal').textContent=money(total);$('#subtotal').textContent=money(sub);$('#delivery').textContent=money(delivery);$('#total').textContent=money(total);$('#orderBtn').disabled=!state.cart.size||(state.config.enforceHours&&!state.open)}
+function orderWhatsApp(){if(!state.cart.size)return;const name=$('#customerName').value.trim();const address=$('#address').value.trim();const notes=$('#notes').value.trim();const zone=selectedZone();const payment=$('#payment').selectedOptions[0]?.textContent||'';const lines=[`*${state.config.name}*`,`Order:`];let sub=0;for(const i of state.cart.values()){lines.push(`${i.qty}× ${i.name} — ${money(i.price*i.qty)}`);sub+=i.price*i.qty}const delivery=Number(zone.price||0);lines.push('',`Subtotal: ${money(sub)}`,`Delivery (${zone.name}): ${money(delivery)}`,`*Total: ${money(sub+delivery)}*`);if(name)lines.push(`Name: ${name}`);if(address)lines.push(`Address: ${address}`);if(payment)lines.push(`Payment: ${payment}`);if(notes)lines.push(`Notes: ${notes}`);const phone=(state.config.whatsappPhone||state.config.phone||'').replace(/\D/g,'');window.open(`https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`,'_blank')}
+function minutes(hhmm){const [h,m]=String(hhmm).split(':').map(Number);return h*60+m}
+function updateStatus(){const c=state.config;const tz=c.timezone||'UTC';const parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());const obj=Object.fromEntries(parts.map(p=>[p.type,p.value]));const map={Mon:'mon',Tue:'tue',Wed:'wed',Thu:'thu',Fri:'fri',Sat:'sat',Sun:'sun'};const hours=c.hours?.[map[obj.weekday]];const now=Number(obj.hour)*60+Number(obj.minute);state.open=Boolean(hours&&now>=minutes(hours[0])&&now<minutes(hours[1]));$('#status').textContent=state.open?'● Open':'● Closed';$('#status').className=`status ${state.open?'open':'closed'}`;renderCart()}
+function applyConfig(c){state.config=c;document.documentElement.lang=(c.locale||'en-US').split('-')[0];document.documentElement.style.setProperty('--primary',c.theme?.primary||'#ff8732');document.documentElement.style.setProperty('--dark',c.theme?.dark||'#3d1800');document.documentElement.style.setProperty('--bg',c.theme?.background||'#faf7f4');$('#businessName').textContent=c.name;$('#tagline').textContent=[c.tagline,c.city].filter(Boolean).join(' · ');document.title=`${c.name} | Menu`;if(c.logoUrl){$('#logo').src=c.logoUrl;$('#logo').hidden=false}const zones=c.deliveryZones||[{name:'Delivery',price:0}];$('#zone').innerHTML=zones.map((z,i)=>`<option value="${i}">${esc(z.name)} · ${money(Number(z.price||0))}</option>`).join('');const methods=c.paymentMethods||[{id:'cash',label:'Cash'}];$('#payment').innerHTML=methods.map(m=>`<option value="${esc(m.id)}">${esc(m.label)}</option>`).join('');$('#restaurantSchema').textContent=JSON.stringify({'@context':'https://schema.org','@type':'Restaurant','name':c.name,'url':location.origin+location.pathname,'telephone':c.phone||undefined,'areaServed':[c.city,c.country].filter(Boolean).join(', '),'menu':location.origin+location.pathname});$('#zone').onchange=renderCart;updateStatus()}
+(async()=>{try{const c=await getJSON('config/site.json');applyConfig(c);state.menu=await loadMenu();render();renderCart();setInterval(updateStatus,60000)}catch(e){console.error(e);$('#menu').innerHTML='<div class="empty">Could not load the menu. Check configuration.</div>'}})();
+$('#search').addEventListener('input',e=>render(e.target.value));$('#orderBtn').onclick=orderWhatsApp;$('#quickCart').onclick=()=>$('#cartPanel').scrollIntoView({behavior:'smooth'});
+</script>
+</body>
+</html>
