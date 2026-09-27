@@ -111,6 +111,41 @@ This phase is **exploratory and not complete yet**. Google API access, product e
 
 See [Phase 2: Google](docs/GOOGLE-PHASE-2.md).
 
+### Phase 3 — Omnichannel sales with Loyverse as the source of truth
+
+The long-term goal is for a small restaurant or food truck to sell **in person, on its website and through WhatsApp** without maintaining three separate catalogs.
+
+```mermaid
+flowchart TB
+    L["Loyverse — source of truth"]
+    L --> POS["In-store POS / tablet"]
+    L --> WEB["Website catalog"]
+    L --> META["Meta catalog"]
+    META --> WA["WhatsApp Business"]
+    WEB --> OQ["Online order queue"]
+    WA --> OQ
+    OQ --> VALIDATE["Validate price / items"]
+    VALIDATE --> RECEIPT["Create confirmed sale in Loyverse"]
+    RECEIPT --> INV["One sales + inventory history"]
+```
+
+The important rule is **one master catalog**: names, prices, modifiers, images, composite items/recipes and availability should originate in Loyverse. Supabase acts as an integration/cache layer, not a competing source of truth.
+
+Planned capabilities:
+
+- use a Loyverse tablet and printer/KDS for local service;
+- publish the same Loyverse catalog to the web;
+- synchronize eligible products to a Meta catalog used by WhatsApp Business;
+- receive structured website and WhatsApp orders into one order queue;
+- validate every online order against the current Loyverse catalog before acceptance;
+- write confirmed sales back to Loyverse so reporting and inventory stay unified;
+- optionally use Meta Business Agent/AI for product questions and recommendations, while keeping prices and stock controlled by the real catalog;
+- preserve human takeover for exceptions and customer service.
+
+**Important implementation question:** Loyverse documents kitchen printing/KDS for orders created through the POS app, but we should not assume an API-created receipt automatically prints in the kitchen. Phase 3 therefore includes testing the print/KDS path and, if needed, designing a small local order bridge.
+
+See [Phase 3: Omnichannel](docs/PHASE-3-OMNICHANNEL.md).
+
 ---
 
 ## What can customers do?

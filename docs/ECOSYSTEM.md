@@ -185,6 +185,121 @@ For that reason, implementation should start with a small controlled test before
 
 See [GOOGLE-PHASE-2.md](GOOGLE-PHASE-2.md).
 
+## Omnichannel operations — Phase 3
+
+Phase 3 expands the project from a web menu into a small-business omnichannel system.
+
+The design principle is:
+
+> **Loyverse is the operational source of truth. Supabase moves and caches data; it should not become a competing product catalog.**
+
+```mermaid
+flowchart TB
+    subgraph Source["ONE SOURCE OF TRUTH"]
+      L["Loyverse"]
+    end
+
+    subgraph Local["LOCAL BUSINESS"]
+      POS["POS tablet"]
+      PRINT["Receipt / kitchen printer"]
+      KDS["Kitchen display"]
+    end
+
+    subgraph Online["ONLINE CHANNELS"]
+      WEB["Restaurant website"]
+      META["Meta catalog"]
+      WA["WhatsApp Business"]
+    end
+
+    subgraph Integration["INTEGRATION LAYER"]
+      CACHE["Supabase catalog cache"]
+      QUEUE["Order queue"]
+      API["Edge Functions / adapters"]
+    end
+
+    L --> CACHE
+    CACHE --> WEB
+    CACHE --> META
+    META --> WA
+    L --> POS
+    POS --> PRINT
+    POS --> KDS
+    WEB --> QUEUE
+    WA --> QUEUE
+    QUEUE --> API
+    API --> L
+```
+
+### Catalog direction
+
+Catalog data flows **outward** from Loyverse:
+
+```text
+Loyverse
+  → normalized cache
+     → website
+     → Meta catalog / WhatsApp
+     → Google (Phase 2)
+```
+
+A price should not need to be edited separately in each channel.
+
+### Order direction
+
+Sales flow **back inward**:
+
+```text
+Local POS ──────────────→ Loyverse
+Website → order queue ─→ Loyverse
+WhatsApp → order queue → Loyverse
+```
+
+Online orders should be validated against the current catalog before becoming a sale.
+
+### Why use an order queue?
+
+A WhatsApp conversation is not automatically a confirmed sale. A customer can abandon the chat, change the order or ask a question.
+
+So Phase 3 separates:
+
+1. **conversation/order intent**;
+2. **accepted order**;
+3. **confirmed sale in Loyverse**.
+
+This prevents abandoned messages from polluting sales and inventory.
+
+### Printing and kitchen displays
+
+Loyverse documents automatic kitchen printing/KDS for orders handled by the POS app. We should not assume API-created receipts produce the same local print event.
+
+That behavior must be tested. If it is not supported, the reusable architecture may need an optional local bridge that listens for accepted online orders and prints/displays them while the sale is still recorded in Loyverse.
+
+### WhatsApp and AI
+
+The WhatsApp layer is optional.
+
+The target architecture is:
+
+```text
+Loyverse catalog
+   ↓
+Meta catalog
+   ↓
+WhatsApp Business
+   ↓
+optional Meta Business Agent
+   ↓
+structured order / human handoff
+   ↓
+order queue
+   ↓
+Loyverse confirmed sale
+```
+
+AI may help answer product questions and recommend catalog items, but final pricing, products and availability must come from the real catalog/backend.
+
+See [PHASE-3-OMNICHANNEL.md](PHASE-3-OMNICHANNEL.md).
+
 ## What is mandatory?
 
 | Component | Basic | Advanced |

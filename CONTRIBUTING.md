@@ -32,3 +32,22 @@ We welcome issues, design reviews, proof-of-concepts and pull requests from cont
 Please avoid hard-coding one restaurant's Google location, project IDs, credentials or API tokens. The goal is a reusable adapter that any eligible restaurant can configure.
 
 See [docs/GOOGLE-PHASE-2.md](docs/GOOGLE-PHASE-2.md).
+
+
+## Phase 3 — omnichannel help wanted
+
+We are also designing a reusable omnichannel layer with **Loyverse as the source of truth** and web/WhatsApp as additional sales channels.
+
+Expert input is especially welcome for:
+
+- Loyverse Receipts API and order write-back;
+- WhatsApp Business Platform / Cloud API;
+- Meta catalogs and product synchronization;
+- Meta Business Agent integrations;
+- webhook verification, retries and deduplication;
+- restaurant kitchen printer/KDS behavior for remotely originated orders;
+- lightweight local print bridges.
+
+The most important architectural rule is that online channels should not become independent product databases. They should read from the same catalog and write confirmed sales back into the same operational system.
+
+See [docs/PHASE-3-OMNICHANNEL.md](docs/PHASE-3-OMNICHANNEL.md).
