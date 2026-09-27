@@ -85,6 +85,42 @@ Esta fase **todavía está en desarrollo**. Buscamos colaboración de personas c
 
 Más detalles: [Fase 2: Google](docs/GOOGLE-PHASE-2.md).
 
+### Fase 3 — Venta omnicanal con Loyverse como fuente maestra
+
+La visión final es que un food truck, restaurante pequeño o cocina de delivery pueda vender **en el local, desde su web y por WhatsApp** sin mantener tres catálogos diferentes.
+
+```mermaid
+flowchart TB
+    L["Loyverse — fuente maestra"]
+    L --> POS["Venta local / tablet"]
+    L --> WEB["Catálogo web"]
+    L --> META["Catálogo Meta"]
+    META --> WA["WhatsApp Business"]
+    WEB --> OQ["Cola de pedidos online"]
+    WA --> OQ
+    OQ --> V["Validar precio / productos"]
+    V --> R["Registrar venta confirmada en Loyverse"]
+    R --> I["Un solo historial de ventas e inventario"]
+```
+
+La regla es simple: **el catálogo se mantiene una sola vez en Loyverse**. Supabase funciona como capa de integración y caché, no como una segunda fuente maestra.
+
+La fase contempla:
+
+- atender en el local con Loyverse POS en una tablet;
+- usar impresora de recibos, impresora de cocina o KDS donde corresponda;
+- publicar automáticamente el catálogo de Loyverse en la web;
+- sincronizar productos elegibles con un catálogo de Meta para WhatsApp Business;
+- recibir pedidos estructurados desde web y WhatsApp;
+- validar precios y productos contra Loyverse antes de aceptar el pedido;
+- registrar las ventas confirmadas en Loyverse para unificar reportes e inventario;
+- usar opcionalmente Meta Business Agent/IA para responder preguntas y recomendar productos;
+- mantener siempre la posibilidad de que una persona tome el control de la conversación.
+
+**Punto técnico por validar:** Loyverse documenta la impresión de cocina/KDS para pedidos manejados por la app POS, pero no debemos asumir que un recibo creado por API imprimirá automáticamente. La Fase 3 incluye probar ese flujo y, si hace falta, crear un pequeño puente local de pedidos.
+
+Más detalles: [Fase 3: Omnicanal](docs/PHASE-3-OMNICHANNEL.md).
+
 ## Archivos que normalmente debes tocar
 
 | Archivo | Para qué sirve |
