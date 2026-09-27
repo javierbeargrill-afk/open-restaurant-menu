@@ -6,7 +6,7 @@ Está pensado para restaurantes pequeños, food trucks, cocinas de delivery y em
 
 > Puedes comenzar con **GitHub Pages + dos archivos editables**. Supabase y Loyverse son opcionales.
 
-[Demo en vivo](https://javierbeargrill-afk.github.io/open-restaurant-menu/) · [English](README.md) · [Guía para empezar](docs/GETTING_STARTED.md) · [Cómo funciona el ecosistema](docs/ECOSYSTEM.md) · [Glosario](docs/GLOSSARY.md)
+[🧪 Demo en vivo](https://javierbeargrill-afk.github.io/open-restaurant-menu/) · [🔥 Ejemplo real](https://menujaviergrill.store/) · [English](README.md) · [Guía para empezar](docs/GETTING_STARTED.md) · [Ecosistema](docs/ECOSYSTEM.md) · [Glosario](docs/GLOSSARY.md)
 
 ## ¿Qué hace este proyecto?
 
@@ -22,6 +22,13 @@ flowchart LR
     E --> F
     F --> G["WhatsApp"]
 ```
+
+### Véalo funcionando
+
+- **🧪 Demo interactiva:** úsala para probar carrito, Delivery/Pickup, ubicación y modo desarrollo sin afectar a un negocio real.
+- **🔥 Implementación real:** [Javier Bear Grill](https://menujaviergrill.store/) es un restaurante en producción usando esta arquitectura mientras evoluciona.
+
+> Javier Bear Grill es un negocio real. Para pruebas, utiliza la demo.
 
 ## Empieza simple
 
@@ -52,6 +59,31 @@ flowchart LR
 ### Nivel 3 — Administrado
 
 Agrega panel Admin, modo de pruebas, sincronización manual, horarios y configuración dinámica.
+
+### Fase 2 — Google, SEO e indexación
+
+La siguiente fase experimental busca usar la misma fuente del menú para mejorar la presencia del restaurante en Google sin mantener otro menú a mano.
+
+```mermaid
+flowchart LR
+    L["Loyverse / fuente del menú"] --> S["Supabase normaliza"]
+    S --> W["Web del restaurante"]
+    S --> G["Google Business Profile"]
+    W --> SEO["SEO + datos estructurados + sitemap"]
+    G --> GM["Google Search / Maps"]
+```
+
+Objetivos:
+
+- sincronizar, cuando Google lo permita, productos, precios, descripciones y fotos con Google Business Profile;
+- mantener la web preparada para SEO con HTML rastreable, Schema.org, canonical y sitemap;
+- conectar Search Console para observar indexación y cobertura;
+- evitar duplicar el mantenimiento entre POS, web y Google;
+- mantener todo Google como módulo opcional.
+
+Esta fase **todavía está en desarrollo**. Buscamos colaboración de personas con experiencia en **Google Business Profile APIs, Search Console, datos estructurados y SEO local para restaurantes**.
+
+Más detalles: [Fase 2: Google](docs/GOOGLE-PHASE-2.md).
 
 ## Archivos que normalmente debes tocar
 
