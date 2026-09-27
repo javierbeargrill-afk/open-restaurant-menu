@@ -1,0 +1,42 @@
+{
+  "name": "Demo Burger",
+  "tagline": "Fresh food, simple ordering",
+  "city": "Your City",
+  "country": "Your Country",
+  "phone": "50760000000",
+  "whatsappPhone": "50760000000",
+  "currency": "USD",
+  "currencySymbol": "$",
+  "locale": "en-US",
+  "dataSource": "static",
+  "supabaseUrl": "",
+  "supabaseAnonKey": "",
+  "instagramUrl": "",
+  "logoUrl": "",
+  "deliveryOnly": true,
+  "theme": {
+    "primary": "#ff8732",
+    "dark": "#3d1800",
+    "background": "#faf7f4"
+  },
+  "hours": {
+    "mon": ["15:30", "23:30"],
+    "tue": ["15:30", "23:30"],
+    "wed": ["15:30", "23:30"],
+    "thu": ["15:30", "23:30"],
+    "fri": ["15:30", "23:30"],
+    "sat": ["13:00", "23:30"],
+    "sun": ["13:00", "23:30"]
+  },
+  "deliveryZones": [
+    {"name": "Nearby", "price": 1.0},
+    {"name": "Extended", "price": 2.0}
+  ],
+  "timezone": "America/Panama",
+  "enforceHours": false,
+  "paymentMethods": [
+    {"id": "cash", "label": "Cash"},
+    {"id": "card", "label": "Card"},
+    {"id": "mobile", "label": "Mobile payment"}
+  ]
+}
