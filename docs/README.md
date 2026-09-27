@@ -11,6 +11,7 @@ You do not need to read everything.
 | Use the Admin panel or Test mode | [Admin & Developer Mode](ADMIN.md) |
 | Understand branches, PRs and deployments | [GitHub Workflow](GITHUB-FLOW.md) |
 | Understand the planned Google/SEO integration | [Phase 2: Google](GOOGLE-PHASE-2.md) |
+| Understand unified POS + web + WhatsApp sales | [Phase 3: Omnichannel](PHASE-3-OMNICHANNEL.md) |
 | Look up a technical word | [Plain-language Glossary](GLOSSARY.md) |
 | Contribute code or documentation | [Contributing](../CONTRIBUTING.md) |
 | Understand privacy/security | [Security](../SECURITY.md) |
