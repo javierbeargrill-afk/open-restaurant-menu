@@ -13,6 +13,8 @@ The project came from a real small delivery restaurant workflow and is shared ba
 
 - Mobile-first menu with categories and search.
 - Cart and WhatsApp order handoff.
+- Delivery or pickup fulfillment.
+- Optional browser geolocation that adds a Google Maps link to delivery orders.
 - Static JSON or Supabase menu source.
 - Optional Loyverse synchronization through a Supabase Edge Function.
 - GitHub Pages friendly.
@@ -26,8 +28,9 @@ The project came from a real small delivery restaurant workflow and is shared ba
 1. Create a repository from this project or fork it.
 2. Edit `config/site.json` with your public business information.
 3. Edit `data/menu.json` with your products.
-4. Replace the placeholder domain in `sitemap.xml`.
-5. Enable GitHub Pages for the `main` branch.
+4. Configure delivery/pickup and optional location sharing in `config/site.json`.
+5. Replace the placeholder domain in `sitemap.xml`.
+6. Enable GitHub Pages for the `main` branch.
 
 ## Advanced mode — Loyverse + Supabase
 

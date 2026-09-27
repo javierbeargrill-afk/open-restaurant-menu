@@ -13,30 +13,75 @@
   "supabaseAnonKey": "",
   "instagramUrl": "",
   "logoUrl": "",
-  "deliveryOnly": true,
   "theme": {
     "primary": "#ff8732",
     "dark": "#3d1800",
     "background": "#faf7f4"
   },
   "hours": {
-    "mon": ["15:30", "23:30"],
-    "tue": ["15:30", "23:30"],
-    "wed": ["15:30", "23:30"],
-    "thu": ["15:30", "23:30"],
-    "fri": ["15:30", "23:30"],
-    "sat": ["13:00", "23:30"],
-    "sun": ["13:00", "23:30"]
+    "mon": [
+      "15:30",
+      "23:30"
+    ],
+    "tue": [
+      "15:30",
+      "23:30"
+    ],
+    "wed": [
+      "15:30",
+      "23:30"
+    ],
+    "thu": [
+      "15:30",
+      "23:30"
+    ],
+    "fri": [
+      "15:30",
+      "23:30"
+    ],
+    "sat": [
+      "13:00",
+      "23:30"
+    ],
+    "sun": [
+      "13:00",
+      "23:30"
+    ]
   },
   "deliveryZones": [
-    {"name": "Nearby", "price": 1.0},
-    {"name": "Extended", "price": 2.0}
+    {
+      "name": "Nearby",
+      "price": 1
+    },
+    {
+      "name": "Extended",
+      "price": 2
+    }
   ],
   "timezone": "America/Panama",
   "enforceHours": false,
   "paymentMethods": [
-    {"id": "cash", "label": "Cash"},
-    {"id": "card", "label": "Card"},
-    {"id": "mobile", "label": "Mobile payment"}
-  ]
+    {
+      "id": "cash",
+      "label": "Cash"
+    },
+    {
+      "id": "card",
+      "label": "Card"
+    },
+    {
+      "id": "mobile",
+      "label": "Mobile payment"
+    }
+  ],
+  "locationSharing": true,
+  "fulfillment": {
+    "delivery": true,
+    "pickup": true,
+    "default": "delivery",
+    "pickupLabel": "Pickup",
+    "pickupAddress": "Configure your public pickup address in config/site.json",
+    "pickupInstructions": "We will confirm by WhatsApp when your order is ready.",
+    "pickupMapUrl": ""
+  }
 }
