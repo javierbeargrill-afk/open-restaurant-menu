@@ -1,6 +1,33 @@
 # Phase 3 — Omnichannel sales with Loyverse as the source of truth
 
-Status: **planned / architecture in progress**
+Status: **active — Phase 3A observation mode**
+
+## Phase 3A — observation mode (current)
+
+Phase 3 starts by **observing before automating**.
+
+The first implementation only receives and stores Loyverse webhook deliveries. It does **not** create receipts, reserve stock, change inventory, or modify the public menu.
+
+This gives a real production dataset for questions that are difficult to answer safely from documentation alone:
+
+- which webhook events actually arrive during normal restaurant operation;
+- retry and duplicate behavior;
+- batch sizes and timing;
+- whether events arrive out of order;
+- the shape of real payloads;
+- how API-created receipts behave in later controlled tests.
+
+For OAuth-created webhooks, the receiver verifies `X-Loyverse-Signature` against the raw request body. For Personal Access Token webhooks, which Loyverse documents as unsigned, the reference implementation requires a separate unguessable webhook secret.
+
+### Inventory readiness
+
+Inventory tracking is **optional during Phase 3A**.
+
+A restaurant may use the project even before its Loyverse catalog is ready for stock tracking. When `track_stock` is false, the integration must not interpret an inventory level of zero as "sold out".
+
+The first production adopter currently keeps physical inventory separately while its restaurant menu is being redesigned for reliable component-level stock deductions. Combo choices and substitutions must be modeled explicitly enough that the POS inventory behavior matches the kitchen's real consumption before automatic availability decisions are enabled.
+
+Until that is true, Phase 3 can still validate webhook delivery, catalog changes, receipts, deduplication, and synchronization behavior without using inventory to accept or reject orders.
 
 ## Why this phase exists
 
@@ -262,6 +289,14 @@ The restaurant owner should not need to remember to change the same burger in fo
 - Admin operations require authenticated server-side sessions.
 
 ## Suggested implementation stages
+
+### 3.0 — Production observation
+
+- Deploy the private webhook inbox.
+- Receive real Loyverse events without changing operational data.
+- Measure retries, duplicates, event timing and payload shapes.
+- Keep the existing human workflow as the safety layer.
+- Do not make stock-based ordering decisions until the restaurant has enabled and validated meaningful inventory tracking.
 
 ### 3.1 — Catalog model
 
