@@ -21,13 +21,18 @@ For OAuth-created webhooks, the receiver verifies `X-Loyverse-Signature` against
 
 ### Inventory readiness
 
-Inventory tracking is **optional during Phase 3A**.
+Inventory tracking is **optional for adopters**, but the first production pilot has now enabled Loyverse inventory tracking and rebuilt combo choices so selected sides/drinks can consume real inventory items instead of relying on non-stock modifiers.
 
-A restaurant may use the project even before its Loyverse catalog is ready for stock tracking. When `track_stock` is false, the integration must not interpret an inventory level of zero as "sold out".
+That means Phase 3A can now observe real inventory behavior, including `inventory_levels.update` events.
 
-The first production adopter currently keeps physical inventory separately while its restaurant menu is being redesigned for reliable component-level stock deductions. Combo choices and substitutions must be modeled explicitly enough that the POS inventory behavior matches the kitchen's real consumption before automatic availability decisions are enabled.
+Important guardrails remain:
 
-Until that is true, Phase 3 can still validate webhook delivery, catalog changes, receipts, deduplication, and synchronization behavior without using inventory to accept or reject orders.
+- when `track_stock` is false, a zero level must not be interpreted as "sold out";
+- imported/initial stock must be reconciled before the website automatically blocks sales;
+- composite items and combo-choice helper items must ultimately consume the same leaf inventory that the kitchen actually uses;
+- negative or unexpected initial balances are treated as data-quality signals to reconcile, not as proof that the architecture is wrong.
+
+Automatic availability decisions come only after the observed Loyverse inventory matches physical operation closely enough to be trusted.
 
 ## Why this phase exists
 
@@ -46,24 +51,29 @@ Supabase is an integration/cache layer. It can store normalized public data, syn
 
 ## The target model
 
+The production pilot intentionally keeps the transactional path simple: **local POS + website**. WhatsApp remains a communication/support channel, while Meta and Google are optional distribution/discovery adapters rather than transaction authorities.
+
 ```mermaid
 flowchart TB
-    L["Loyverse — master catalog + POS"]
+    L["Loyverse — source of truth"]
     L --> P["Local POS tablet"]
-    L --> C["Normalized catalog cache"]
-    C --> W["Restaurant website"]
-    C --> M["Meta catalog"]
-    M --> WA["WhatsApp Business"]
-    C --> G["Google adapters — Phase 2"]
+    L --> C["Normalized catalog + inventory cache"]
 
-    W --> Q["Online order queue"]
-    WA --> Q
-    Q --> V["Validate current items/prices"]
+    C --> W["Restaurant website"]
+    W --> Q["Structured online order"]
+    Q --> V["Fresh Loyverse validation"]
     V --> A{"Accepted?"}
     A -->|No| X["Reject / ask customer"]
     A -->|Yes| R["Create confirmed sale in Loyverse"]
     R --> S["Unified reporting + inventory"]
+
+    C --> M["Meta catalog — optional discovery"]
+    C --> G["Google adapters — Phase 2"]
+    WA["WhatsApp Business"] --> W
+    WA --> H["Human support / exceptions"]
 ```
+
+This removes a second transactional menu from the critical path. If Meta/WhatsApp catalog updates lag, they cannot authorize a sale: the website/backend still revalidates against Loyverse before acceptance.
 
 ## Single source of truth
 
@@ -124,51 +134,33 @@ This allows online orders to become part of the same sales history as local POS 
 
 The existing WhatsApp handoff can remain available as a simple/basic mode.
 
-## WhatsApp Business catalog
+## Meta / WhatsApp — optional, not the transactional source
 
-The proposed catalog path is:
+The production pilot does **not** require a WhatsApp catalog to take orders.
+
+Preferred operational model:
 
 ```text
-Loyverse
-   ↓
-normalized catalog
-   ↓
-Meta catalog / Commerce layer
-   ↓
-WhatsApp Business catalog/product messages
+Customer conversation in WhatsApp
+          ↓
+restaurant website
+          ↓
+structured order
+          ↓
+fresh Loyverse validation
 ```
 
-The integration must preserve stable source IDs so an item updated in Loyverse can update the corresponding Meta product instead of creating duplicates.
+A Meta catalog may still be useful for advertising, recommendations or discovery, but its cached availability is not trusted as the final inventory decision.
 
-Useful sync fields include:
+WhatsApp remains useful for:
 
-- Loyverse item/variant ID;
-- Meta catalog item ID;
-- source update timestamp;
-- image identity/hash;
-- last sync timestamp;
-- last result/error.
+- customer questions;
+- order clarification;
+- human takeover;
+- delivery coordination;
+- sending the website/menu link.
 
-## WhatsApp orders
-
-WhatsApp is a conversation channel, not automatically a sale ledger.
-
-A safe design is:
-
-```mermaid
-stateDiagram-v2
-    [*] --> Inquiry
-    Inquiry --> DraftOrder
-    DraftOrder --> PendingConfirmation
-    PendingConfirmation --> Accepted
-    PendingConfirmation --> Rejected
-    Accepted --> LoyverseSale
-    LoyverseSale --> Completed
-```
-
-Only an **accepted/confirmed** order should become a Loyverse sale.
-
-This prevents abandoned chats, questions and incomplete carts from changing inventory or reports.
+If a future adopter wants structured WhatsApp ordering, it can plug into the same validated order queue later. It remains an optional adapter rather than a Phase 3 prerequisite.
 
 ## Writing sales back to Loyverse
 
@@ -290,59 +282,54 @@ The restaurant owner should not need to remember to change the same burger in fo
 
 ## Suggested implementation stages
 
-### 3.0 — Production observation
+### 3.0 — Production observation — **starting now**
 
 - Deploy the private webhook inbox.
 - Receive real Loyverse events without changing operational data.
+- Observe `items.update`, `inventory_levels.update` and receipt-related behavior.
 - Measure retries, duplicates, event timing and payload shapes.
 - Keep the existing human workflow as the safety layer.
-- Do not make stock-based ordering decisions until the restaurant has enabled and validated meaningful inventory tracking.
 
-### 3.1 — Catalog model
+### 3.1 — Inventory truth + catalog model
 
-- Map Loyverse IDs, variants, modifiers and composite items.
-- Add sync/mapping tables.
-- Document which Loyverse fields are public vs internal.
+- Reconcile physical stock against Loyverse after the initial inventory migration.
+- Map Loyverse item/variant IDs, composite items and reusable combo-choice components.
+- Treat absolute Loyverse inventory as authoritative; never reconstruct stock from receipt deltas.
+- Add sync/mapping tables and freshness timestamps.
+- Do not block website sales from stock until observed inventory quality is reliable.
 
-### 3.2 — Meta catalog adapter
+### 3.2 — Structured website order
 
-- Connect a test Meta catalog.
-- Sync one product.
-- Update its price/image.
-- Verify no duplicate product is created.
-- Expand to categories/catalog.
+- Website creates a server-side draft order.
+- Re-read current Loyverse price/availability immediately before acceptance.
+- Add accepted/rejected/conflict states.
+- Preserve the current WhatsApp/manual flow as fallback during the pilot.
 
-### 3.3 — Online order queue
+### 3.3 — Loyverse write-back
 
-- Website creates structured draft order.
-- Validate against Loyverse.
-- Add accepted/rejected states.
-- Add source tracking.
+- Create one controlled test sale using the Receipts API.
+- Verify totals, taxes, item mapping and inventory effects.
+- Verify behavior when inventory is already insufficient.
+- Store the project order UUID ↔ Loyverse receipt mapping.
+- Add idempotent retry protection before real customer automation.
 
-### 3.4 — Loyverse write-back
-
-- Create one test sale using the Receipts API.
-- Verify totals, taxes, modifiers and reporting.
-- Test inventory effects.
-- Add deduplication.
-
-### 3.5 — Kitchen workflow
+### 3.4 — Kitchen workflow
 
 - Test whether API-originated sales trigger the required printer/KDS behavior.
-- If not, prototype a local bridge.
+- If not, prototype a minimal local bridge.
 
-### 3.6 — WhatsApp Business
+### 3.5 — Optional Meta / WhatsApp adapter
 
-- Receive WhatsApp events through verified webhooks.
-- Map catalog items to structured orders.
-- Connect accepted orders to the same queue/write-back flow.
+- Keep WhatsApp as communication/human support by default.
+- Use Meta catalog for discovery/marketing where useful.
+- Add structured WhatsApp ordering only for adopters that explicitly need it.
 
-### 3.7 — Optional AI assistant
+### 3.6 — Optional AI assistant
 
 - Connect Meta Business Agent where available.
 - Restrict responses/actions to validated catalog/order tools.
-- Test human handoff.
-- Audit edge cases before enabling real ordering.
+- Send purchase intent to the website/validated backend.
+- Test human handoff and edge cases before enabling real ordering.
 
 ## Help wanted
 
