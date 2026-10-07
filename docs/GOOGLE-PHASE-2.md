@@ -1,8 +1,24 @@
 # Phase 2 — Google discovery, SEO and menu distribution
 
-Status: **experimental / in progress**
+Status: **active pilot — Google Business Profile API access approved**
 
 The goal of Phase 2 is not merely to place a link on Google. The idea is to make the restaurant's existing menu data useful across the web and eligible Google surfaces without maintaining a second manual copy.
+
+## Production pilot status
+
+The first production adopter has received Google approval to use the Google Business Profile API, with a default quota of **300 queries per minute (QPM)**.
+
+This approval removes the API allowlist blocker, but it does **not** mean every restaurant location is automatically eligible for every feature. The integration must still:
+
+1. enable the required Business Profile API services in the Google Cloud project;
+2. complete OAuth 2.0 authorization with the `business.manage` scope;
+3. discover the authenticated Business Profile account and location IDs;
+4. read the location state and verify `canHaveFoodMenus`;
+5. read the current menu using `accounts.locations.getFoodMenus`;
+6. test one controlled menu update with `accounts.locations.updateFoodMenus`;
+7. verify how media/photo `mediaKey` mappings behave before broader synchronization.
+
+The project should treat Google as a downstream publishing target. **Loyverse remains the source of truth** for the restaurant catalog.
 
 ## Vision
 

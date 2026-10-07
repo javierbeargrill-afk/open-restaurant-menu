@@ -19,13 +19,13 @@ Status: **working**
 
 ## Phase 2 — Google discovery, SEO and menu distribution
 
-Status: **in progress / experimental**
+Status: **active pilot — API access approved**
 
 Goal: let the same restaurant data feed both the website and eligible Google surfaces, instead of maintaining separate copies manually.
 
 Planned work:
 
-- Google Business Profile API integration where supported.
+- Google Business Profile API integration where supported. **API allowlist access approved for the first production pilot.**
 - Food/menu synchronization for eligible restaurant profiles.
 - Product photo/media synchronization or mapping.
 - A stable image pipeline so changed photos can be detected and updated without unnecessary duplicate uploads.
