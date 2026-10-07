@@ -51,38 +51,41 @@ We would especially welcome contributors with practical experience in:
 
 See [docs/GOOGLE-PHASE-2.md](docs/GOOGLE-PHASE-2.md).
 
-## Phase 3 — Omnichannel sales and WhatsApp catalog
+## Phase 3 — Loyverse-centered omnichannel sales
 
-Status: **planned / architecture in progress**
+Status: **active — production observation pilot**
 
-Goal: make Loyverse the operational source of truth for a small restaurant while allowing sales from three channels:
+Goal: make Loyverse the operational source of truth while keeping the first transactional rollout deliberately simple:
 
-- in-store POS/tablet;
-- restaurant website;
-- WhatsApp Business.
+- in-store POS/tablet → Loyverse;
+- restaurant website → validation → Loyverse;
+- WhatsApp → communication/support and website handoff.
 
-The intended architecture is:
+Meta and Google remain optional catalog/discovery adapters, not the authority that decides whether stock can be sold.
+
+The current pilot architecture is:
 
 ```mermaid
 flowchart LR
-    L["Loyverse master catalog"] --> POS["In-store POS"]
-    L --> WEB["Website"]
-    L --> MC["Meta catalog"]
-    MC --> WA["WhatsApp Business"]
-    WEB --> Q["Order queue"]
-    WA --> Q
-    Q --> CHECK["Validate against Loyverse"]
+    L["Loyverse source of truth"] --> POS["In-store POS"]
+    L --> CACHE["Catalog + inventory cache"]
+    CACHE --> WEB["Website"]
+    WEB --> Q["Structured order"]
+    Q --> CHECK["Fresh Loyverse validation"]
     CHECK --> SALE["Confirmed sale → Loyverse receipt"]
+    CACHE --> META["Meta — optional"]
+    CACHE --> GOOGLE["Google — Phase 2"]
+    WA["WhatsApp"] --> WEB
 ```
 
 Planned work:
 
 - Treat Loyverse as the single source for products, variants/modifiers, prices, images and composite-item components.
 - Keep Supabase as a cache/integration layer rather than a second master catalog.
-- Build a reusable Meta catalog adapter fed from the normalized Loyverse catalog.
-- Support WhatsApp product/catalog messages where the connected Meta account supports them.
-- Add webhook/order intake for structured WhatsApp orders.
+- Observe real Loyverse webhooks and inventory behavior before automating sales.
+- Reconcile real component-level stock after enabling inventory tracking.
 - Add a website order intake path that does not depend only on a prefilled WhatsApp message.
+- Keep Meta/WhatsApp catalog ordering optional; the first pilot uses the website as the digital transaction path.
 - Create an order queue with states such as pending, accepted, rejected, paid/unpaid and completed.
 - Revalidate item IDs, prices and availability before accepting online orders.
 - Use Loyverse `RECEIPTS_WRITE` only for confirmed sales so abandoned chats do not become fake sales.
